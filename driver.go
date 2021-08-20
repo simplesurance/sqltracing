@@ -10,9 +10,9 @@ import (
 	"github.com/ngrok/sqlmw"
 )
 
-// Driver wraps an SQL driver and traces all operations via an
+// tracedDriver wraps an SQL driver and traces all operations via an
 // opentracing tracer
-type Driver struct {
+type tracedDriver struct {
 	excludedOps map[SQLOp]struct{}
 	tracer      Tracer
 }
@@ -20,7 +20,7 @@ type Driver struct {
 // NewDriver returns a new driver that traces all operations and forwards them
 // to the passed driver.
 func NewDriver(driver driver.Driver, tracer Tracer, opts ...Opt) driver.Driver {
-	tracingDriver := Driver{
+	tracingDriver := tracedDriver{
 		excludedOps: map[SQLOp]struct{}{},
 		tracer:      tracer,
 	}
@@ -35,7 +35,7 @@ func NewDriver(driver driver.Driver, tracer Tracer, opts ...Opt) driver.Driver {
 	)
 }
 
-func (t *Driver) ConnBeginTx(ctx context.Context, con driver.ConnBeginTx, txOpts driver.TxOptions) (_ driver.Tx, err error) {
+func (t *tracedDriver) ConnBeginTx(ctx context.Context, con driver.ConnBeginTx, txOpts driver.TxOptions) (_ driver.Tx, err error) {
 	const op = OpSQLTxBegin
 
 	if t.opIsExcluded(op) {
@@ -53,7 +53,7 @@ func (t *Driver) ConnBeginTx(ctx context.Context, con driver.ConnBeginTx, txOpts
 	return newTracedTx(ctx, spanFinishFunc(span), tx), nil
 }
 
-func (t *Driver) ConnPrepareContext(ctx context.Context, con driver.ConnPrepareContext, query string) (_ driver.Stmt, err error) {
+func (t *tracedDriver) ConnPrepareContext(ctx context.Context, con driver.ConnPrepareContext, query string) (_ driver.Stmt, err error) {
 	const op = OpSQLPrepare
 
 	if t.opIsExcluded(op) {
@@ -72,7 +72,7 @@ func (t *Driver) ConnPrepareContext(ctx context.Context, con driver.ConnPrepareC
 	return newTracedStmt(ctx, spanFinishFunc(span), stmt), nil
 }
 
-func (t *Driver) ConnPing(ctx context.Context, con driver.Pinger) (err error) {
+func (t *tracedDriver) ConnPing(ctx context.Context, con driver.Pinger) (err error) {
 	var deferFn func(err error)
 
 	deferFn, ctx = t.startSpan(ctx, OpSQLPing, "")
@@ -81,7 +81,7 @@ func (t *Driver) ConnPing(ctx context.Context, con driver.Pinger) (err error) {
 	return con.Ping(ctx)
 }
 
-func (t *Driver) ConnExecContext(ctx context.Context, con driver.ExecerContext, query string, args []driver.NamedValue) (_ driver.Result, err error) {
+func (t *tracedDriver) ConnExecContext(ctx context.Context, con driver.ExecerContext, query string, args []driver.NamedValue) (_ driver.Result, err error) {
 	var deferFn func(err error)
 
 	deferFn, ctx = t.startSpan(ctx, OpSQLConnExec, query)
@@ -90,7 +90,7 @@ func (t *Driver) ConnExecContext(ctx context.Context, con driver.ExecerContext, 
 	return con.ExecContext(ctx, query, args)
 }
 
-func (t *Driver) ConnQueryContext(ctx context.Context, con driver.QueryerContext, query string, args []driver.NamedValue) (_ driver.Rows, err error) {
+func (t *tracedDriver) ConnQueryContext(ctx context.Context, con driver.QueryerContext, query string, args []driver.NamedValue) (_ driver.Rows, err error) {
 	const op = OpSQLConnQuery
 
 	if t.opIsExcluded(op) {
@@ -117,7 +117,7 @@ func (t *Driver) ConnQueryContext(ctx context.Context, con driver.QueryerContext
 	return newTracedRows(ctx, spanFinishFunc(span), rows), nil
 }
 
-func (t *Driver) ConnectorConnect(ctx context.Context, connector driver.Connector) (_ driver.Conn, err error) {
+func (t *tracedDriver) ConnectorConnect(ctx context.Context, connector driver.Connector) (_ driver.Conn, err error) {
 	var deferFn func(err error)
 
 	deferFn, ctx = t.startSpan(ctx, OpSQLConnect, "")
@@ -126,15 +126,15 @@ func (t *Driver) ConnectorConnect(ctx context.Context, connector driver.Connecto
 	return connector.Connect(ctx)
 }
 
-func (t *Driver) ResultLastInsertId(res driver.Result) (int64, error) {
+func (t *tracedDriver) ResultLastInsertId(res driver.Result) (int64, error) {
 	return res.LastInsertId()
 }
 
-func (t *Driver) ResultRowsAffected(res driver.Result) (int64, error) {
+func (t *tracedDriver) ResultRowsAffected(res driver.Result) (int64, error) {
 	return res.RowsAffected()
 }
 
-func (t *Driver) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) (err error) {
+func (t *tracedDriver) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) (err error) {
 	tracedCtx := ctx
 
 	if tracedRows, ok := rows.(*tracedRows); ok {
@@ -147,7 +147,7 @@ func (t *Driver) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.V
 	return rows.Next(dest)
 }
 
-func (t *Driver) RowsClose(ctx context.Context, rows driver.Rows) (err error) {
+func (t *tracedDriver) RowsClose(ctx context.Context, rows driver.Rows) (err error) {
 	const op = OpSQLRowsClose
 
 	if tracedRows, ok := rows.(*tracedRows); ok {
@@ -167,7 +167,7 @@ func (t *Driver) RowsClose(ctx context.Context, rows driver.Rows) (err error) {
 	return rows.Close()
 }
 
-func (t *Driver) StmtExecContext(ctx context.Context, stmt driver.StmtExecContext, _ string, args []driver.NamedValue) (_ driver.Result, err error) {
+func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt driver.StmtExecContext, _ string, args []driver.NamedValue) (_ driver.Result, err error) {
 	// TODO: record as child span of PrepareContext span
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtExec, "")
 	defer deferFn(err)
@@ -175,7 +175,7 @@ func (t *Driver) StmtExecContext(ctx context.Context, stmt driver.StmtExecContex
 	return stmt.ExecContext(ctx, args)
 }
 
-func (t *Driver) StmtQueryContext(ctx context.Context, stmt driver.StmtQueryContext, _ string, args []driver.NamedValue) (rows driver.Rows, err error) {
+func (t *tracedDriver) StmtQueryContext(ctx context.Context, stmt driver.StmtQueryContext, _ string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	// TODO: record as child span of PrepareContext span
 
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtQuery, "")
@@ -184,7 +184,7 @@ func (t *Driver) StmtQueryContext(ctx context.Context, stmt driver.StmtQueryCont
 	return stmt.QueryContext(ctx, args)
 }
 
-func (t *Driver) StmtClose(ctx context.Context, stmt driver.Stmt) (err error) {
+func (t *tracedDriver) StmtClose(ctx context.Context, stmt driver.Stmt) (err error) {
 	if tracedStmt, ok := stmt.(*tracedStmt); ok {
 		deferFn, _ := t.startSpan(tracedStmt.ctx, OpSQLStmtClose, "")
 		defer deferFn(err)
@@ -202,7 +202,7 @@ func (t *Driver) StmtClose(ctx context.Context, stmt driver.Stmt) (err error) {
 	return stmt.Close()
 }
 
-func (t *Driver) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
+func (t *tracedDriver) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
 	const op = OpSQLTxCommit
 
 	if tracedTx, ok := tx.(*tracedTx); ok {
@@ -219,7 +219,7 @@ func (t *Driver) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
 	return tx.Commit()
 }
 
-func (t *Driver) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
+func (t *tracedDriver) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
 	const op = OpSQLTxRollback
 
 	if tracedTx, ok := tx.(*tracedTx); ok {
@@ -236,9 +236,9 @@ func (t *Driver) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
 	return tx.Rollback()
 }
 
-func (t *Driver) opIsExcluded(op SQLOp) bool {
+func (t *tracedDriver) opIsExcluded(op SQLOp) bool {
 	_, exist := t.excludedOps[op]
 	return exist
 }
 
-var _ sqlmw.Interceptor = &Driver{}
+var _ sqlmw.Interceptor = &tracedDriver{}
