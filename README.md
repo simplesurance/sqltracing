@@ -1,4 +1,5 @@
 # sqltracing
+![CI](https://github.com/simplesurance/sqltracing/actions/workflows/go.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/simplesurance/sqltracing)](https://goreportcard.com/report/github.com/simplesurance/sqltracing)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/simplesurance/sqltracing)
 
