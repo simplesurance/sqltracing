@@ -1,9 +1,11 @@
 package sqltracing
 
 // SQLOp is the name of an sql operation.
-// It can be passed to the WithOpsExcluded() option
 type SQLOp string
 
+// Defines the names of SQL operations.
+// These constants are used to name the tracing spans for the related SQL
+// operations.
 const (
 	OpSQLPrepare    SQLOp = "sql-prepare"
 	OpSQLConnExec   SQLOp = "sql-conn-exec"

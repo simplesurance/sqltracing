@@ -2,7 +2,7 @@ package sqltracing
 
 import "context"
 
-// Tracer defines the required methods of a Tracer implementation
+// Tracer defines the required methods of a Tracer implementation.
 type Tracer interface {
 	// StartSpan extracts the parent span from ctx and starts a child span
 	// called spanName. It returns the child span and a new context that
@@ -10,7 +10,7 @@ type Tracer interface {
 	StartSpan(ctx context.Context, spanName string) (Span, context.Context)
 }
 
-// Span is part of the interface needed to be implemented by any tracing implementation we use
+// Span is part of the interface that needs to be implemented by Tracers.
 type Span interface {
 	// SetTag sets the tags with identifier k to value v.
 	SetTag(k, v string)
