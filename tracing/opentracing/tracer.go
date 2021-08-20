@@ -1,4 +1,4 @@
-// package opentracing provides an opentracing-go Tracer that is compatible
+// Package opentracing provides an opentracing-go Tracer that is compatible
 // with the sqltracing.Tracer interface.
 package opentracing
 
