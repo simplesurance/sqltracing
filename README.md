@@ -26,4 +26,4 @@ SQL middleware and contains some modified code of
 [ngrok/sqlmw](https://github.com/ngrok/sqlmw) is also based on
 [luna-duclos/instrumentedsql](https://github.com/luna-duclos/instrumentedsql)
 which is a fork of
-[ExpansiveWorlds(instrumentedsql](https://github.com/ExpansiveWorlds/instrumentedsql).
+[ExpansiveWorlds/instrumentedsql](https://github.com/ExpansiveWorlds/instrumentedsql).
