@@ -5,6 +5,8 @@ github.com/fho/sqlmw v0.0.0-20210818164410-40591a922eee h1:i1Sv1K/MMiZqq8uMyrQ4k
 github.com/fho/sqlmw v0.0.0-20210818164410-40591a922eee/go.mod h1:E26fwEtRNigBfFfHDWsklmo0T7Ixbg0XXgck+Hq4O9k=
 github.com/ngrok/sqlmw v0.0.0-20210818172531-9a9596d93cc7 h1:DWfftf3Z0DvNwoz/LX6TOBZh76h3eX3CHmTdsFOlibI=
 github.com/ngrok/sqlmw v0.0.0-20210818172531-9a9596d93cc7/go.mod h1:E26fwEtRNigBfFfHDWsklmo0T7Ixbg0XXgck+Hq4O9k=
+github.com/ngrok/sqlmw v0.0.0-20210819213940-241da6c2def4 h1:cJ9hh7bz2opvgNYlWPayJXgeLHkzK1/KSTzFzqIZvEI=
+github.com/ngrok/sqlmw v0.0.0-20210819213940-241da6c2def4/go.mod h1:E26fwEtRNigBfFfHDWsklmo0T7Ixbg0XXgck+Hq4O9k=
 github.com/opentracing/opentracing-go v1.2.0 h1:uEJPy/1a5RIPAJ0Ov+OIO8OxWu77jEv+1B0VhjKrZUs=
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
