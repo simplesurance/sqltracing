@@ -1,4 +1,4 @@
-// Package sqltracing provides a SQL driver wrapped to record trace for db
+// Package sqltracing provides a SQL driver wrapper to record trace for db
 // operations.
 package sqltracing
 
@@ -17,8 +17,10 @@ type tracedDriver struct {
 	tracer      Tracer
 }
 
-// NewDriver returns a new driver that traces all operations and forwards them
-// to the passed driver.
+// NewDriver returns a driver that wraps the passed driver and records traces
+// for it's operations.
+// Compatible tracer implementations can be found in the package
+// sqltracing/tracing/.
 func NewDriver(driver driver.Driver, tracer Tracer, opts ...Opt) driver.Driver {
 	tracingDriver := tracedDriver{
 		excludedOps: map[SQLOp]struct{}{},

@@ -1,3 +1,5 @@
+// package opentracing provides an opentracing-go Tracer that is compatible
+// with the sqltracing.Tracer interface.
 package opentracing
 
 import (
@@ -26,10 +28,11 @@ type span struct {
 	span opentracing.Span
 }
 
+// Opt is a type for options that can be passed to NewTracer.
 type Opt func(*tracer)
 
 // WithTracingTags is an option for NewTracer() to set the tags that are
-// applied to all traces.
+// applied to all traces created by StartSpan().
 func WithTracingTags(tags opentracing.Tags) Opt {
 	return func(t *tracer) {
 		t.defaultTags = tags
@@ -53,10 +56,8 @@ func WithTracer(fn func() opentracing.Tracer) Opt {
 }
 
 // NewTracer returns a tracer that will create spans via opentracing-go.
-// The following defaults are used for the configurable options:
-// - Tracer: opentracing.GlobalTracer
-// - Tags: DefaultTracingTags
-// - TraceOrphans: true
+// When no options are specified, opentracing.GlobalTracer is used as default
+// Tracer, DefaultTracingTags are used as tags and TraceOrphans is enabled.
 func NewTracer(opts ...Opt) sqltracing.Tracer {
 	tr := tracer{
 		traceOrphans: true,
