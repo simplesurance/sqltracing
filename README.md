@@ -1,10 +1,17 @@
 # sqltracing
+[![Go Report Card](https://goreportcard.com/badge/github.com/simplesurance/sqltracing)](https://goreportcard.com/report/github.com/simplesurance/sqltracing)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/simplesurance/sqltracing)
 
 sqltracing is a Go package for tracing database operations via an OpenTracing
 tracer.
 It can wrap any `driver.Driver` compatible SQL driver.
 
-## Example
+
+## Documentation
+
+[Go Package Documentation](https://pkg.go.dev/github.com/simplesurance/sqltracing)
+
+### Example
 
 See [example_test.go](example_test.go)
 
