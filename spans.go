@@ -7,7 +7,7 @@ import (
 
 const DBStatementTagKey = "db.statement"
 
-func (d *Driver) startSpan(ctx context.Context, opName SQLOp, query string, whitelistedErr ...error) (func(err error), context.Context) {
+func (d *tracedDriver) startSpan(ctx context.Context, opName SQLOp, query string, whitelistedErr ...error) (func(err error), context.Context) {
 	if d.opIsExcluded(opName) {
 		return func(_ error) {}, ctx
 	}
