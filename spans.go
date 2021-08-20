@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+// DBStatementTagKey is the name of the tracing that contains db query
+// statements.
 const DBStatementTagKey = "db.statement"
 
 func (d *tracedDriver) startSpan(ctx context.Context, opName SQLOp, query string, whitelistedErr ...error) (func(err error), context.Context) {
