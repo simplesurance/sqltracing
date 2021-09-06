@@ -172,7 +172,10 @@ func (t *tracedDriver) RowsClose(rows driver.Rows) (err error) {
 }
 
 func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt *sqlmw.Stmt, args []driver.NamedValue) (_ driver.Result, err error) {
-	// TODO: record as child span of PrepareContext span
+	if tracedStmt, ok := stmt.Parent().(*tracedStmt); ok {
+		ctx = tracedStmt.ctx
+	}
+
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtExec, "")
 	defer deferFn(err)
 
@@ -180,12 +183,19 @@ func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt *sqlmw.Stmt, ar
 }
 
 func (t *tracedDriver) StmtQueryContext(ctx context.Context, stmt *sqlmw.Stmt, args []driver.NamedValue) (rows driver.Rows, err error) {
-	// TODO: record as child span of PrepareContext span
+	if tracedStmt, ok := stmt.Parent().(*tracedStmt); ok {
+		ctx = tracedStmt.ctx
+	}
 
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtQuery, "")
-	defer deferFn(err)
 
-	return stmt.QueryContext(ctx, args)
+	rows, err = stmt.QueryContext(ctx, args)
+	if err != nil {
+		deferFn(err)
+		return nil, err
+	}
+
+	return newTracedRows(ctx, deferFn, rows), nil
 }
 
 func (t *tracedDriver) StmtClose(stmt *sqlmw.Stmt) (err error) {

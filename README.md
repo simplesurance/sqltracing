@@ -18,9 +18,6 @@ See [example_test.go](example_test.go)
 
 ## Known Issues
 
-- Prepared Statements: `ExecContext()` and `QueryContext()` operations are
-  recorded as independent spans instead of as child spawns of the
-  `PrepareContext()` operation.
 - Transactions: all operations on transactions except `Commit()` and
   `Rollback()` are recorded as independent spans, instead of as child spans of
   the `BeginTx()` operation

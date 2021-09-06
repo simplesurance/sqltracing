@@ -86,6 +86,7 @@ func assertIsParentSpanOp(t *testing.T, tracer *mocktracer.MockTracer, parentOp,
 }
 
 func assertIsParentSpan(t *testing.T, tracer *mocktracer.MockTracer, parentOp, childOp string) {
+	t.Helper()
 
 	parentSpan := findFinishedSpan(t, tracer, parentOp)
 	if parentSpan == nil {
@@ -246,12 +247,7 @@ func TestStatementExecContext(t *testing.T) {
 	_ = stmt.Close()
 
 	assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLPrepare, sqltracing.OpSQLStmtClose)
-	// TODO: this assert can be removed when the skip for
-	// StmtQueryIsChildSpan is removed
-	assertHasSpan(t, mockTracer, sqltracing.OpSQLStmtExec)
-
 	t.Run("StmtExecIsChildSpan", func(t *testing.T) {
-		t.Skip("not implemented")
 		assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLPrepare, sqltracing.OpSQLStmtExec)
 	})
 }
@@ -273,13 +269,7 @@ func TestStatementQueryContext(t *testing.T) {
 
 	assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLPrepare, sqltracing.OpSQLStmtClose)
 
-	// TODO: these both asserts can be removed when the skip for
-	// StmtQueryIsChildSpan is removed
-	assertHasSpan(t, mockTracer, sqltracing.OpSQLRowsNext)
-	assertHasSpan(t, mockTracer, sqltracing.OpSQLRowsClose)
-
 	t.Run("StmtQueryIsChildSpan", func(t *testing.T) {
-		t.Skip("not implemented")
 		assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLPrepare, sqltracing.OpSQLStmtQuery)
 		assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLStmtQuery, sqltracing.OpSQLRowsNext)
 		assertIsParentSpanOp(t, mockTracer, sqltracing.OpSQLStmtQuery, sqltracing.OpSQLRowsClose)
