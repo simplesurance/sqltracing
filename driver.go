@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"io"
 
-	"github.com/ngrok/sqlmw"
+	"github.com/simplesurance/sqlmw"
 )
 
 // tracedDriver wraps an SQL driver and traces all operations via an
@@ -136,20 +136,22 @@ func (t *tracedDriver) ResultRowsAffected(res driver.Result) (int64, error) {
 	return res.RowsAffected()
 }
 
-func (t *tracedDriver) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) (err error) {
-	tracedCtx := ctx
+func (t *tracedDriver) RowsNext(rows driver.Rows, dest []driver.Value) (err error) {
+	var ctx context.Context
 
 	if tracedRows, ok := rows.(*tracedRows); ok {
-		tracedCtx = tracedRows.ctx
+		ctx = tracedRows.ctx
+	} else {
+		ctx = context.Background()
 	}
 
-	deferFn, _ := t.startSpan(tracedCtx, OpSQLRowsNext, "", io.EOF)
+	deferFn, _ := t.startSpan(ctx, OpSQLRowsNext, "", io.EOF)
 	defer deferFn(err)
 
 	return rows.Next(dest)
 }
 
-func (t *tracedDriver) RowsClose(ctx context.Context, rows driver.Rows) (err error) {
+func (t *tracedDriver) RowsClose(rows driver.Rows) (err error) {
 	const op = OpSQLRowsClose
 
 	if tracedRows, ok := rows.(*tracedRows); ok {
@@ -163,13 +165,13 @@ func (t *tracedDriver) RowsClose(ctx context.Context, rows driver.Rows) (err err
 		return rows.Close()
 	}
 
-	deferFn, _ := t.startSpan(ctx, op, "")
+	deferFn, _ := t.startSpan(context.Background(), op, "")
 	defer deferFn(err)
 
 	return rows.Close()
 }
 
-func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt driver.StmtExecContext, _ string, args []driver.NamedValue) (_ driver.Result, err error) {
+func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt *sqlmw.Stmt, args []driver.NamedValue) (_ driver.Result, err error) {
 	// TODO: record as child span of PrepareContext span
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtExec, "")
 	defer deferFn(err)
@@ -177,7 +179,7 @@ func (t *tracedDriver) StmtExecContext(ctx context.Context, stmt driver.StmtExec
 	return stmt.ExecContext(ctx, args)
 }
 
-func (t *tracedDriver) StmtQueryContext(ctx context.Context, stmt driver.StmtQueryContext, _ string, args []driver.NamedValue) (rows driver.Rows, err error) {
+func (t *tracedDriver) StmtQueryContext(ctx context.Context, stmt *sqlmw.Stmt, args []driver.NamedValue) (rows driver.Rows, err error) {
 	// TODO: record as child span of PrepareContext span
 
 	deferFn, ctx := t.startSpan(ctx, OpSQLStmtQuery, "")
@@ -186,8 +188,8 @@ func (t *tracedDriver) StmtQueryContext(ctx context.Context, stmt driver.StmtQue
 	return stmt.QueryContext(ctx, args)
 }
 
-func (t *tracedDriver) StmtClose(ctx context.Context, stmt driver.Stmt) (err error) {
-	if tracedStmt, ok := stmt.(*tracedStmt); ok {
+func (t *tracedDriver) StmtClose(stmt *sqlmw.Stmt) (err error) {
+	if tracedStmt, ok := stmt.Parent().(*tracedStmt); ok {
 		deferFn, _ := t.startSpan(tracedStmt.ctx, OpSQLStmtClose, "")
 		defer deferFn(err)
 
@@ -198,13 +200,13 @@ func (t *tracedDriver) StmtClose(ctx context.Context, stmt driver.Stmt) (err err
 		return stmt.Close()
 	}
 
-	deferFn, _ := t.startSpan(ctx, OpSQLStmtClose, "")
+	deferFn, _ := t.startSpan(context.Background(), OpSQLStmtClose, "")
 	defer deferFn(nil)
 
 	return stmt.Close()
 }
 
-func (t *tracedDriver) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
+func (t *tracedDriver) TxCommit(tx driver.Tx) (err error) {
 	const op = OpSQLTxCommit
 
 	if tracedTx, ok := tx.(*tracedTx); ok {
@@ -215,13 +217,13 @@ func (t *tracedDriver) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
 		return tx.Commit()
 	}
 
-	deferFn, _ := t.startSpan(ctx, op, "")
+	deferFn, _ := t.startSpan(context.Background(), op, "")
 	defer deferFn(err)
 
 	return tx.Commit()
 }
 
-func (t *tracedDriver) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
+func (t *tracedDriver) TxRollback(tx driver.Tx) (err error) {
 	const op = OpSQLTxRollback
 
 	if tracedTx, ok := tx.(*tracedTx); ok {
@@ -232,7 +234,7 @@ func (t *tracedDriver) TxRollback(ctx context.Context, tx driver.Tx) (err error)
 		return tx.Rollback()
 	}
 
-	deferFn, _ := t.startSpan(ctx, op, "")
+	deferFn, _ := t.startSpan(context.Background(), op, "")
 	defer deferFn(err)
 
 	return tx.Rollback()

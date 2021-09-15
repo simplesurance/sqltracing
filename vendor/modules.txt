@@ -1,9 +1,6 @@
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/ngrok/sqlmw v0.0.0-20210819213940-241da6c2def4
-## explicit
-github.com/ngrok/sqlmw
 # github.com/opentracing/opentracing-go v1.2.0
 ## explicit
 github.com/opentracing/opentracing-go
@@ -12,6 +9,9 @@ github.com/opentracing/opentracing-go/log
 github.com/opentracing/opentracing-go/mocktracer
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/simplesurance/sqlmw v0.1.0
+## explicit
+github.com/simplesurance/sqlmw
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
