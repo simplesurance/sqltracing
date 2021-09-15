@@ -10,7 +10,8 @@ type wrappedDriver struct {
 
 // Compile time validation that our types implement the expected interfaces
 var (
-	_ driver.Driver = wrappedDriver{}
+	_ driver.Driver        = wrappedDriver{}
+	_ driver.DriverContext = wrappedDriver{}
 )
 
 // WrapDriver will wrap the passed SQL driver and return a new sql driver that uses it and also logs and traces calls using the passed logger and tracer
@@ -35,4 +36,20 @@ func (d wrappedDriver) Open(name string) (driver.Conn, error) {
 	}
 
 	return wrappedConn{intr: d.intr, parent: conn}, nil
+}
+
+func (d wrappedDriver) OpenConnector(name string) (driver.Connector, error) {
+	driver, ok := d.parent.(driver.DriverContext)
+	if !ok {
+		return wrappedConnector{
+			parent:    dsnConnector{dsn: name, driver: d.parent},
+			driverRef: &d,
+		}, nil
+	}
+	conn, err := driver.OpenConnector(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return wrappedConnector{parent: conn, driverRef: &d}, nil
 }

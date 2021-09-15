@@ -20,6 +20,8 @@ var (
 	_ driver.Pinger             = wrappedConn{}
 	_ driver.Queryer            = wrappedConn{}
 	_ driver.QueryerContext     = wrappedConn{}
+	_ driver.SessionResetter    = wrappedConn{}
+	_ driver.NamedValueChecker  = wrappedConn{}
 )
 
 func (c wrappedConn) Prepare(query string) (driver.Stmt, error) {
@@ -27,7 +29,7 @@ func (c wrappedConn) Prepare(query string) (driver.Stmt, error) {
 	if err != nil {
 		return nil, err
 	}
-	return wrappedStmt{intr: c.intr, query: query, parent: stmt, conn: c}, nil
+	return wrappedStmt{intr: c.intr, parent: stmt, conn: c}, nil
 }
 
 func (c wrappedConn) Close() error {
@@ -48,7 +50,7 @@ func (c wrappedConn) BeginTx(ctx context.Context, opts driver.TxOptions) (tx dri
 	if err != nil {
 		return nil, err
 	}
-	return wrappedTx{intr: c.intr, ctx: ctx, parent: tx}, nil
+	return wrappedTx{intr: c.intr, parent: tx}, nil
 }
 
 func (c wrappedConn) PrepareContext(ctx context.Context, query string) (stmt driver.Stmt, err error) {
@@ -57,7 +59,7 @@ func (c wrappedConn) PrepareContext(ctx context.Context, query string) (stmt dri
 	if err != nil {
 		return nil, err
 	}
-	return wrappedStmt{intr: c.intr, ctx: ctx, query: query, parent: stmt, conn: c}, nil
+	return wrappedStmt{intr: c.intr, parent: stmt, conn: c}, nil
 }
 
 func (c wrappedConn) Exec(query string, args []driver.Value) (driver.Result, error) {
@@ -78,7 +80,7 @@ func (c wrappedConn) ExecContext(ctx context.Context, query string, args []drive
 	if err != nil {
 		return nil, err
 	}
-	return wrappedResult{intr: c.intr, ctx: ctx, parent: r}, nil
+	return wrappedResult{intr: c.intr, parent: r}, nil
 }
 
 func (c wrappedConn) Ping(ctx context.Context) (err error) {
@@ -113,7 +115,7 @@ func (c wrappedConn) QueryContext(ctx context.Context, query string, args []driv
 		return nil, err
 	}
 
-	return wrappedRows{intr: c.intr, ctx: ctx, parent: rows}, nil
+	return wrappedRows{intr: c.intr, parent: rows}, nil
 }
 
 type wrappedParentConn struct {
@@ -178,4 +180,26 @@ func (c wrappedParentConn) QueryContext(ctx context.Context, query string, args 
 	default:
 		return c.Conn.(driver.Queryer).Query(query, dargs)
 	}
+}
+
+func (c wrappedConn) ResetSession(ctx context.Context) error {
+	conn, ok := c.parent.(driver.SessionResetter)
+	if !ok {
+		return nil
+	}
+
+	return conn.ResetSession(ctx)
+}
+
+func defaultCheckNamedValue(nv *driver.NamedValue) (err error) {
+	nv.Value, err = driver.DefaultParameterConverter.ConvertValue(nv.Value)
+	return err
+}
+
+func (c wrappedConn) CheckNamedValue(v *driver.NamedValue) error {
+	if checker, ok := c.parent.(driver.NamedValueChecker); ok {
+		return checker.CheckNamedValue(v)
+	}
+
+	return defaultCheckNamedValue(v)
 }
