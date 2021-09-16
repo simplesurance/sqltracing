@@ -5,8 +5,6 @@ github.com/opentracing/opentracing-go v1.2.0 h1:uEJPy/1a5RIPAJ0Ov+OIO8OxWu77jEv+
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/simplesurance/sqlmw v0.0.0-20210914161839-1b19ee35ec98 h1:EZdwxplglD/oMtbuvpL5tGwLgeoBXLQtoFb90VFuZmk=
-github.com/simplesurance/sqlmw v0.0.0-20210914161839-1b19ee35ec98/go.mod h1:Hm4eHnK/BDe+XH6qE4mxN5cCP+QjklGby5elQmW2rcQ=
 github.com/simplesurance/sqlmw v0.1.0 h1:0ISPClSiFcZYuvmO8wR45H0aGcEpcIrey6eB9tAzRR4=
 github.com/simplesurance/sqlmw v0.1.0/go.mod h1:Hm4eHnK/BDe+XH6qE4mxN5cCP+QjklGby5elQmW2rcQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
