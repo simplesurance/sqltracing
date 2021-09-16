@@ -7,6 +7,8 @@ sqltracing is a Go package for tracing database operations via an OpenTracing
 tracer.
 It can wrap any `driver.Driver` compatible SQL driver.
 
+It is implemented as an interceptor for
+[simplesurance/sqlmw](https://github.com/simplesurance/sqlmw).
 
 ## Documentation
 
@@ -22,13 +24,11 @@ See [example_test.go](example_test.go)
   `Rollback()` are recorded as independent spans, instead of as child spans of
   the `BeginTx()` operation
 
-## History
+## Credits
 
-sqltracing is build on top of the [ngrok/sqlmw](https://github.com/ngrok/sqlmw)
-SQL middleware and contains some modified code of
-[luna-duclos/instrumentedsql](https://github.com/luna-duclos/instrumentedsql).
-\
-[ngrok/sqlmw](https://github.com/ngrok/sqlmw) is also based on
-[luna-duclos/instrumentedsql](https://github.com/luna-duclos/instrumentedsql)
-which is a fork of
-[ExpansiveWorlds/instrumentedsql](https://github.com/ExpansiveWorlds/instrumentedsql).
+sqltracing and simplesurance/sqlmw are based heavily on forks and the ideas of
+the following projects:
+
+- [ngrok/sqlmw](https://github.com/ngrok/sqlmw)
+- [luna-duclos/instrumentedsql](https://github.com/luna-duclos/instrumentedsql)
+- [ExpansiveWorlds/instrumentedsql](https://github.com/ExpansiveWorlds/instrumentedsql)
