@@ -8,14 +8,14 @@ import (
 	"github.com/simplesurance/sqltracing/tracing/opentracing"
 )
 
-func ExampleNewDriver() {
+func ExampleWrapDriver() {
 	// register an sql driver called "traced-sql", that wraps the passed
 	// driver.
 	// Instead of nullDriver, pgx.GetDefaultDriver() can be passed for
 	// example to trace operations of the pgx driver.
 	sql.Register(
 		"traced-sql",
-		sqltracing.NewDriver(&nullDriver{}, opentracing.NewTracer()),
+		sqltracing.WrapDriver(&nullDriver{}, opentracing.NewTracer()),
 	)
 
 	// open a database to the passed dsn, using the traced-sql driver

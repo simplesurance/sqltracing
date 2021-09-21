@@ -26,7 +26,7 @@ func mustNewDBDriver(t *testing.T) (*mocktracer.MockTracer, string) {
 
 	sql.Register(
 		driverName,
-		sqltracing.NewDriver(
+		sqltracing.WrapDriver(
 			&nullDriver{con: &nullCon{}},
 			opentracing.NewTracer(
 				opentracing.WithTracer(
@@ -282,7 +282,7 @@ func TestWithOpsExcluded(t *testing.T) {
 
 	sql.Register(
 		driverName,
-		sqltracing.NewDriver(
+		sqltracing.WrapDriver(
 			&nullDriver{con: &nullCon{}},
 			opentracing.NewTracer(
 				opentracing.WithTracer(
@@ -314,7 +314,7 @@ func TestWithoutTracingOrphans(t *testing.T) {
 
 	sql.Register(
 		driverName,
-		sqltracing.NewDriver(
+		sqltracing.WrapDriver(
 			&nullDriver{con: &nullCon{}},
 			opentracing.NewTracer(
 				opentracing.WithoutTracingOrphans(),
