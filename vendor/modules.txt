@@ -9,7 +9,7 @@ github.com/opentracing/opentracing-go/log
 github.com/opentracing/opentracing-go/mocktracer
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/simplesurance/sqlmw v0.1.0
+# github.com/simplesurance/sqlmw v0.2.0
 ## explicit
 github.com/simplesurance/sqlmw
 # github.com/stretchr/testify v1.7.0
