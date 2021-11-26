@@ -22,6 +22,9 @@ var (
 	_ driver.QueryerContext     = wrappedConn{}
 	_ driver.SessionResetter    = wrappedConn{}
 	_ driver.NamedValueChecker  = wrappedConn{}
+	_ driver.NamedValueChecker  = wrappedConn{}
+	_ driver.Validator          = wrappedConn{}
+	_ driver.SessionResetter    = wrappedConn{}
 )
 
 func (c wrappedConn) Prepare(query string) (driver.Stmt, error) {
@@ -202,4 +205,14 @@ func (c wrappedConn) CheckNamedValue(v *driver.NamedValue) error {
 	}
 
 	return defaultCheckNamedValue(v)
+}
+
+func (c wrappedConn) IsValid() bool {
+	conn, ok := c.parent.(driver.Validator)
+	if !ok {
+		// the default if driver.Validator is not supported
+		return true
+	}
+
+	return conn.IsValid()
 }
