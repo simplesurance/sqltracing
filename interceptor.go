@@ -39,7 +39,7 @@ func NewInterceptor(tracer Tracer, opts ...Opt) *Interceptor {
 func WrapDriver(driver driver.Driver, tracer Tracer, opts ...Opt) driver.Driver {
 	icp := NewInterceptor(tracer, opts...)
 
-	return sqlmw.Driver(
+	return sqlmw.WrapDriver(
 		driver,
 		icp,
 	)
